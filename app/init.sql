@@ -1,3 +1,4 @@
+-- Run with `sudo -u postgres psql`
 DROP DATABASE IF EXISTS snowboy;
 CREATE DATABASE snowboy;
 \c snowboy;
