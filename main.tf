@@ -90,7 +90,7 @@ resource "google_compute_instance" "vm" {
     }
   }
 
-  metadata_startup_script = "sudo apt-get update; sudo apt-get install -yq build-essential"
+  metadata_startup_script = file("${path.module}/startup.sh")
 
   network_interface {
     subnetwork = google_compute_subnetwork.default.id
