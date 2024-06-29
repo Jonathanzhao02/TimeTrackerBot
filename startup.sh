@@ -1,8 +1,9 @@
 #!/bin/bash
 sudo apt-get update
 sudo apt-get install -yq build-essential git nodejs npm postgresql
-sudo npm install --global yarn
+systemctl start postgresql.service
 sudo -u postgres psql -c "CREATE USER snowboy WITH SUPERUSER PASSWORD 'password'"
+sudo npm install --global yarn
 
 git clone https://github.com/Jonathanzhao02/TimeTrackerBot.git
 cd TimeTrackerBot/app
