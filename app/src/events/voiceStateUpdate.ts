@@ -1,5 +1,5 @@
 import { Events, VoiceState } from 'discord.js';
-import { storeStateInfo, storeVoiceEvent } from '../db';
+import { storeVoiceEvent } from '../db';
 
 export default {
   name: Events.VoiceStateUpdate,
@@ -8,11 +8,6 @@ export default {
     try {
       console.log('Storing new event');
 
-      await storeStateInfo(oldState);
-      await storeStateInfo(newState);
-
-      console.log('Successfully stored state info');
-
       if (oldState.channel == null && newState.channel != null) {
         await storeVoiceEvent(newState, 'Join');
         console.log('Successfully stored join event');
@@ -20,6 +15,11 @@ export default {
       else if (oldState.channel != null && newState.channel == null) {
         await storeVoiceEvent(oldState, 'Leave');
         console.log('Successfully stored leave event');
+      }
+      else if (oldState.channel != null && newState.channel != null && oldState.channel != newState.channel) {
+        await storeVoiceEvent(oldState, 'Leave');
+        await storeVoiceEvent(newState, 'Join');
+        console.log('Successfully stored switch event');
       }
     }
     catch (err) {

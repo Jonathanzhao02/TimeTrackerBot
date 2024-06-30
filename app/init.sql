@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS guilds (
 CREATE TABLE IF NOT EXISTS channels (
   id BIGINT PRIMARY KEY,
   channel_name VARCHAR(100) NOT NULL,
+  guild_id BIGINT REFERENCES guilds(id) NOT NULL,
   created_at TIMESTAMP NOT NULL
 );
 
