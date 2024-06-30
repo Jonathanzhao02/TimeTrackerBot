@@ -8,15 +8,15 @@ export default {
     try {
       console.log('Storing new event');
 
-      if (oldState.channel == null && newState.channel != null) {
+      if (oldState.channelId == null && newState.channelId != null) {
         await storeVoiceEvent(newState, 'Join');
         console.log('Successfully stored join event');
       }
-      else if (oldState.channel != null && newState.channel == null) {
+      else if (oldState.channelId != null && newState.channelId == null) {
         await storeVoiceEvent(oldState, 'Leave');
         console.log('Successfully stored leave event');
       }
-      else if (oldState.channel != null && newState.channel != null && oldState.channel != newState.channel) {
+      else if (oldState.channelId != null && newState.channelId != null && oldState.channelId != newState.channelId) {
         await storeVoiceEvent(oldState, 'Leave');
         await storeVoiceEvent(newState, 'Join');
         console.log('Successfully stored switch event');

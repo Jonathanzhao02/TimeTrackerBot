@@ -56,7 +56,7 @@ export async function storeGuildInfo(guild: Guild) {
 }
 
 export async function storeVoiceEvent(state: VoiceState, type: 'Join'|'Leave') {
-  if (state.member && state.channel) {
+  if (state.member) {
     await storeMember(state.member);
 
     await query(
@@ -64,7 +64,7 @@ export async function storeVoiceEvent(state: VoiceState, type: 'Join'|'Leave') {
       INSERT INTO voice_events (user_id, channel_id, guild_id, event_type, created_at) \
       VALUES ($1, $2, $3, $4, $5) \
       ',
-      [state.member.id, state.channel.id, state.guild.id, type, new Date()],
+      [state.member.id, state.channelId, state.guild.id, type, new Date()],
     );
   }
 }
