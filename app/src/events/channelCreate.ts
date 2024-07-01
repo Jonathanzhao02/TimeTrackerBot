@@ -13,8 +13,8 @@ export default {
       }
     }
     catch (err) {
-      console.log('Failed with channel:');
-      console.log(channel.toJSON());
+      console.error('Failed with channel:');
+      console.error(channel.toJSON());
       throw err;
     }
   },

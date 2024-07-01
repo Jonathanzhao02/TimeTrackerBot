@@ -1,12 +1,13 @@
-import { Events } from 'discord.js';
+import { Events, NonThreadGuildBasedChannel } from 'discord.js';
 import { ExtendedClient } from '../types';
 import deployCommands from '../deploy-commands';
-import { storeGuildInfo } from '../db';
+import { storeGuildInfo, storeVoiceEvent } from '../db';
 
 export default {
   name: Events.ClientReady,
   once: true,
   async execute(client: ExtendedClient) {
+    let nMembers = 0;
     console.log(`Ready! Logged in as ${client.user?.tag}`);
     deployCommands();
 
@@ -15,6 +16,21 @@ export default {
     const guilds = await Promise.all((await client.guilds.fetch()).map(guild => guild.fetch()));
     await Promise.all(guilds.map(storeGuildInfo));
 
-    console.log('Updated %d guilds', guilds.length);
+    const channels = (await Promise.all(guilds.map(guild => guild.channels.fetch()))).reduce(
+      (p, c) => p.concat(<NonThreadGuildBasedChannel[]>Array.from(c.filter(e => e != null).values())),
+      <NonThreadGuildBasedChannel[]>[],
+    );
+
+    await Promise.all(channels.map(channel => {
+      if (channel.isVoiceBased()) {
+        nMembers += channel.members.size;
+        return channel.members.map(member => storeVoiceEvent(member, channel.id, channel.guild, 'Join'));
+      }
+      else {
+        return null;
+      }
+    }));
+
+    console.log('Updated %d guilds, %d channels, %d members', guilds.length, channels.length, nMembers);
   },
 };

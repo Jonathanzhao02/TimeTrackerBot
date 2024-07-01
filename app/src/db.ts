@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { Channel, Guild, GuildMember, VoiceState } from 'discord.js';
+import { Channel, Guild, GuildMember } from 'discord.js';
 
 const pool = new Pool({ database: 'snowboy' });
 
@@ -55,16 +55,14 @@ export async function storeGuildInfo(guild: Guild) {
   }));
 }
 
-export async function storeVoiceEvent(state: VoiceState, type: 'Join'|'Leave') {
-  if (state.member) {
-    await storeMember(state.member);
+export async function storeVoiceEvent(member: GuildMember, channelId: string, guild: Guild, type: 'Join'|'Leave') {
+  await storeMember(member);
 
-    await query(
-      ' \
-      INSERT INTO voice_events (user_id, channel_id, guild_id, event_type, created_at) \
-      VALUES ($1, $2, $3, $4, $5) \
-      ',
-      [state.member.id, state.channelId, state.guild.id, type, new Date()],
-    );
-  }
+  await query(
+    ' \
+    INSERT INTO voice_events (user_id, channel_id, guild_id, event_type, created_at) \
+    VALUES ($1, $2, $3, $4, $5) \
+    ',
+    [member.id, channelId, guild.id, type, new Date()],
+  );
 }

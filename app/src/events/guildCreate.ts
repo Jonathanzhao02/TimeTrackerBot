@@ -11,8 +11,8 @@ export default {
       console.log('Successfully stored guild');
     }
     catch (err) {
-      console.log('Failed with guild:');
-      console.log(guild.toJSON());
+      console.error('Failed with guild:');
+      console.error(guild.toJSON());
       throw err;
     }
   },

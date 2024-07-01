@@ -8,24 +8,31 @@ export default {
     try {
       console.log('Storing new event');
 
-      if (oldState.channelId == null && newState.channelId != null) {
-        await storeVoiceEvent(newState, 'Join');
-        console.log('Successfully stored join event');
+      if (oldState.member && newState.member) {
+        if (oldState.channelId == null && newState.channelId != null) {
+          await storeVoiceEvent(newState.member, newState.channelId, newState.guild, 'Join');
+          console.log('Successfully stored join event');
+        }
+        else if (oldState.channelId != null && newState.channelId == null) {
+          await storeVoiceEvent(oldState.member, oldState.channelId, oldState.guild, 'Leave');
+          console.log('Successfully stored leave event');
+        }
+        else if (oldState.channelId != null && newState.channelId != null && oldState.channelId != newState.channelId) {
+          await storeVoiceEvent(oldState.member, oldState.channelId, oldState.guild, 'Leave');
+          await storeVoiceEvent(newState.member, newState.channelId, newState.guild, 'Join');
+          console.log('Successfully stored switch event');
+        }
       }
-      else if (oldState.channelId != null && newState.channelId == null) {
-        await storeVoiceEvent(oldState, 'Leave');
-        console.log('Successfully stored leave event');
-      }
-      else if (oldState.channelId != null && newState.channelId != null && oldState.channelId != newState.channelId) {
-        await storeVoiceEvent(oldState, 'Leave');
-        await storeVoiceEvent(newState, 'Join');
-        console.log('Successfully stored switch event');
+      else {
+        console.warn('Strange states found:');
+        console.warn(oldState.toJSON());
+        console.warn(newState.toJSON());
       }
     }
     catch (err) {
-      console.log('Failed with states:');
-      console.log(oldState.toJSON());
-      console.log(newState.toJSON());
+      console.error('Failed with states:');
+      console.error(oldState.toJSON());
+      console.error(newState.toJSON());
       throw err;
     }
   },

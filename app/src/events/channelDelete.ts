@@ -9,8 +9,8 @@ export default {
       console.log('Deleting channel');
     }
     catch (err) {
-      console.log('Failed with channel:');
-      console.log(channel.toJSON());
+      console.error('Failed with channel:');
+      console.error(channel.toJSON());
       throw err;
     }
   },

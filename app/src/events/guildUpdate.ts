@@ -13,9 +13,9 @@ export default {
       }
     }
     catch (err) {
-      console.log('Failed with guilds:');
-      console.log(oldGuild.toJSON());
-      console.log(newGuild.toJSON());
+      console.error('Failed with guilds:');
+      console.error(oldGuild.toJSON());
+      console.error(newGuild.toJSON());
       throw err;
     }
   },

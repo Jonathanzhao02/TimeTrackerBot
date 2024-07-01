@@ -22,9 +22,9 @@ export default {
       }
     }
     catch (err) {
-      console.log('Failed with channels:');
-      console.log(oldChannel.toJSON());
-      console.log(newChannel.toJSON());
+      console.error('Failed with channels:');
+      console.error(oldChannel.toJSON());
+      console.error(newChannel.toJSON());
       throw err;
     }
   },
