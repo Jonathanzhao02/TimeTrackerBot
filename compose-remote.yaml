@@ -1,0 +1,52 @@
+secrets:
+  pg_pass:
+    environment: PG_PASS
+  env:
+    file: /.env
+
+services:
+  db:
+    image: jonathanzhao02/snowboy:db
+    restart: always
+    environment:
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD_FILE: /run/secrets/pg_pass
+    secrets:
+      - pg_pass
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${PG_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  
+  bot:
+    image: jonathanzhao02/snowboy:bot
+    restart: always
+    environment:
+      ENV_FILE: /run/secrets/env
+    secrets:
+      - env
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      db:
+        condition: service_healthy
+  
+  rest:
+    image: jonathanzhao02/snowboy:rest
+    restart: always
+    environment:
+      ENV_FILE: /run/secrets/env
+    secrets:
+      - env
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

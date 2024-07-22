@@ -1,0 +1,15 @@
+{
+  "name": "@time-tracker/top",
+  "scripts": {
+    "start:bot": "yarn workspace @time-tracker/bot start",
+    "start:rest": "yarn workspace @time-tracker/rest start",
+    "build": "yarn workspace @time-tracker/database build && yarn workspace @time-tracker/bot build && yarn workspace @time-tracker/rest build",
+    "build:bot": "yarn workspace @time-tracker/database build && yarn workspace @time-tracker/bot build",
+    "build:rest": "yarn workspace @time-tracker/database build && yarn workspace @time-tracker/rest build"
+  },
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "packages/*"
+  ]
+}

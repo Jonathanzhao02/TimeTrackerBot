@@ -53,40 +53,19 @@ resource "google_compute_firewall" "ssh-rule" {
   }
   target_tags = ["ssh"]
   source_ranges = ["0.0.0.0/0"]
-}
-
-resource "google_compute_firewall" "http-rule" {
-  name = "allow-http"
-  network = google_compute_network.vpc_network.name
-  allow {
-    protocol = "tcp"
-    ports = ["80"]
-  }
-  target_tags = ["http-server"]
-  source_ranges = ["0.0.0.0/0"]
-}
-
-resource "google_compute_firewall" "https-rule" {
-  name = "allow-https"
-  network = google_compute_network.vpc_network.name
-  allow {
-    protocol = "tcp"
-    ports = ["443"]
-  }
-  target_tags = ["https-server"]
-  source_ranges = ["0.0.0.0/0"]
+  direction = "INGRESS"
 }
 
 resource "google_compute_instance" "vm" {
   name         = "snowboy"
   machine_type = "e2-micro"
-  tags         = ["ssh", "http-server", "https-server"]
+  tags         = ["ssh"]
 
   boot_disk {
     initialize_params {
       image = "debian-cloud/debian-12"
       type  = "pd-standard"
-      size  = 10
+      size  = 20
     }
   }
 

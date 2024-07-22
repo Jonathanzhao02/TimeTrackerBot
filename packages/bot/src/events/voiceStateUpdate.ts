@@ -10,16 +10,16 @@ export default {
 
       if (oldState.member && newState.member) {
         if (oldState.channelId == null && newState.channelId != null) {
-          await storeVoiceEvent(newState.member, newState.channelId, newState.guild, 'Join');
+          await storeVoiceEvent(newState.member, newState.channelId, newState.guild, 'JOIN');
           console.log('Successfully stored join event');
         }
         else if (oldState.channelId != null && newState.channelId == null) {
-          await storeVoiceEvent(oldState.member, oldState.channelId, oldState.guild, 'Leave');
+          await storeVoiceEvent(oldState.member, oldState.channelId, oldState.guild, 'LEAVE');
           console.log('Successfully stored leave event');
         }
         else if (oldState.channelId != null && newState.channelId != null && oldState.channelId != newState.channelId) {
-          await storeVoiceEvent(oldState.member, oldState.channelId, oldState.guild, 'Leave');
-          await storeVoiceEvent(newState.member, newState.channelId, newState.guild, 'Join');
+          await storeVoiceEvent(oldState.member, oldState.channelId, oldState.guild, 'LEAVE');
+          await storeVoiceEvent(newState.member, newState.channelId, newState.guild, 'JOIN');
           console.log('Successfully stored switch event');
         }
       }
