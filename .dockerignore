@@ -2,9 +2,9 @@
 packages/*/node_modules
 packages/*/dist
 node_modules
+.env
 .terraform
 .terraform.lock.hcl
-main.terraform
-startup.sh
 terraform.tfstate
 terraform.tfstate.backup
+terraform.tfvars
