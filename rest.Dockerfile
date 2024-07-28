@@ -21,6 +21,7 @@ FROM gcr.io/distroless/nodejs20-debian12 AS final
 
 WORKDIR /app
 
+ENV USE_SECRETS 1
 COPY --from=production /app .
 
 EXPOSE 3000

@@ -1,21 +1,11 @@
-terraform {
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = "4.51.0"
-    }
-  }
-}
-
-provider "google" {
-  project = "snowboy-discord"
-  region  = "us-central1"
-  zone    = "us-central1-c"
+data "google_billing_account" "billing" {
+  display_name = var.billing_name
+  open         = true
 }
 
 resource "google_project" "my_project" {
-  name            = "Snowboy Discord"
-  project_id      = "snowboy-discord"
+  name            = var.project_name
+  project_id      = var.project_id
   billing_account = data.google_billing_account.billing.id
 }
 
@@ -30,17 +20,16 @@ resource "google_project_iam_member" "gae_api" {
   member  = "serviceAccount:${google_service_account.custom_service_account.email}"
 }
 
-
 resource "google_compute_network" "vpc_network" {
-  name                    = "snowboy-network"
+  name                    = "${var.project_id}-network"
   auto_create_subnetworks = false
   mtu                     = 1460
 }
 
 resource "google_compute_subnetwork" "default" {
-  name          = "snowboy-subnet"
+  name          = "${var.project_id}-subnet"
   ip_cidr_range = "10.0.1.0/24"
-  region        = "us-central1"
+  region        = var.gcp_region
   network       = google_compute_network.vpc_network.id
 }
 
@@ -57,7 +46,7 @@ resource "google_compute_firewall" "ssh-rule" {
 }
 
 resource "google_compute_instance" "vm" {
-  name         = "snowboy"
+  name         = "${var.project_id}-vm"
   machine_type = "e2-micro"
   tags         = ["ssh"]
 
@@ -69,7 +58,13 @@ resource "google_compute_instance" "vm" {
     }
   }
 
-  metadata_startup_script = file("${path.module}/startup.sh")
+  metadata_startup_script = templatefile("${path.module}/startup.tpl", {
+    account_id = var.cf_account_id,
+    tunnel_id = cloudflare_tunnel.vm_tunnel.id,
+    secret = random_id.argo_secret.b64_std,
+    http_domain = "${cloudflare_record.vm_http.name}.${var.cf_domain}",
+    ssh_domain = "${cloudflare_record.ssh.name}.${var.cf_domain}"
+  })
 
   network_interface {
     subnetwork = google_compute_subnetwork.default.id
@@ -78,9 +73,4 @@ resource "google_compute_instance" "vm" {
       network_tier = "STANDARD"
     }
   }
-}
-
-data "google_billing_account" "billing" {
-  display_name = "Billing"
-  open         = true
 }

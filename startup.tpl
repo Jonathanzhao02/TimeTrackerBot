@@ -24,4 +24,41 @@ sudo apt-get update
 
 sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin cloudflared
 
+/usr/bin/logger "== Cloudflared setup START =="
+
+sudo mkdir ~/.cloudflared
+cat <<EOF > ~/.cloudflared/cert.json
+{
+  "AccountTag"   : "${account_id}",
+  "TunnelID"     : "${tunnel_id}",
+  "TunnelSecret" : "${secret}"
+}
+EOF
+
+cat <<EOF > ~/.cloudflared/config.yml
+tunnel: ${tunnel_id}
+credentials-file: /etc/cloudflared/cert.json
+logfile: /var/log/cloudflared.log
+loglevel: info
+
+ingress:
+  - hostname: ${http_domain}
+    service: http://localhost:3000
+  - hostname: ${ssh_domain}
+    service: ssh://localhost:22
+  - service: http_status:404
+EOF
+
+sudo mkdir -p /etc/cloudflared/
+sudo cp ~/.cloudflared/cert.json /etc/cloudflared/
+sudo cp ~/.cloudflared/config.yml /etc/cloudflared/
+
+sudo cloudflared --config /etc/cloudflared/config.yml service install
+sudo systemctl enable cloudflared
+sudo systemctl enable cloudflared-update.timer
+sudo systemctl start cloudflared
+sudo systemctl start cloudflared-update.timer
+
+/usr/bin/logger "== Cloudflared setup END =="
+
 /usr/bin/logger "== Startup script END =="
