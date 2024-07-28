@@ -10,9 +10,9 @@
     "build": "tsup src/index.ts --minify"
   },
   "dependencies": {
-    "@time-tracker/database": "./packages/database",
-    "discord.js": "^14.15.3",
-    "dotenv": "^16.4.5"
+    "@time-tracker/database": "^1.0.0",
+    "@time-tracker/secrets": "^1.0.0",
+    "discord.js": "^14.15.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.6.0",

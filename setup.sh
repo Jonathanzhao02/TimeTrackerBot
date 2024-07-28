@@ -1,6 +1,7 @@
+# Add current user to docker sudo group
 sudo usermod -aG docker $USER
 newgrp docker
-echo "Copy .env to / root in VM!"
+
 echo "Don't forget to ssh manually and add to known hosts!"
 
 # ON CLIENT:

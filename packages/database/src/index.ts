@@ -7,7 +7,7 @@ import { Guild } from './models/guild';
 import { Channel } from './models/channel';
 import { VoiceEvent } from './models/voiceEvent';
 
-const env = <keyof typeof config>process.env.NODE_ENV || 'development';
+const env = <keyof typeof config>process.env.NODE_ENV ?? 'development';
 
 const sequelize = new Sequelize(config[env].database, config[env].username, config[env].password, <Options>config[env]);
 

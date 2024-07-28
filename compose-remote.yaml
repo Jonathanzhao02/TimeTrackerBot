@@ -1,17 +1,24 @@
 secrets:
+  pg_user:
+    environment: PG_USER
   pg_pass:
     environment: PG_PASS
-  env:
-    file: /.env
+  pg_host:
+    environment: PG_HOST
+  discord_token:
+    environment: DISCORD_TOKEN
+  discord_client_id:
+    environment: DISCORD_CLIENT_ID
 
 services:
   db:
     image: jonathanzhao02/snowboy:db
     restart: always
     environment:
-      POSTGRES_USER: ${PG_USER}
+      POSTGRES_USER_FILE: /run/secrets/pg_user
       POSTGRES_PASSWORD_FILE: /run/secrets/pg_pass
     secrets:
+      - pg_user
       - pg_pass
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -25,9 +32,17 @@ services:
     image: jonathanzhao02/snowboy:bot
     restart: always
     environment:
-      ENV_FILE: /run/secrets/env
+      PG_USER_FILE: /run/secrets/pg_user
+      PG_PASS_FILE: /run/secrets/pg_pass
+      PG_HOST_FILE: /run/secrets/pg_host
+      DISCORD_TOKEN_FILE: /run/secrets/discord_token
+      DISCORD_CLIENT_ID_FILE: /run/secrets/discord_client_id
     secrets:
-      - env
+      - pg_pass
+      - pg_user
+      - pg_host
+      - discord_token
+      - discord_client_id
     ports:
       - "80:80"
       - "443:443"
@@ -39,9 +54,13 @@ services:
     image: jonathanzhao02/snowboy:rest
     restart: always
     environment:
-      ENV_FILE: /run/secrets/env
+      PG_USER_FILE: /run/secrets/pg_user
+      PG_PASS_FILE: /run/secrets/pg_pass
+      PG_HOST_FILE: /run/secrets/pg_host
     secrets:
-      - env
+      - pg_user
+      - pg_pass
+      - pg_host
     ports:
       - "3000:3000"
     depends_on:
