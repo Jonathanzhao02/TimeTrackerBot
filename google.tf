@@ -40,6 +40,9 @@ resource "google_compute_firewall" "ssh-rule" {
     protocol = "tcp"
     ports = ["22"]
   }
+  allow {
+    protocol = "icmp"
+  }
   target_tags = ["ssh"]
   source_ranges = ["0.0.0.0/0"]
   direction = "INGRESS"
