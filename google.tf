@@ -20,6 +20,11 @@ resource "google_project_iam_member" "gae_api" {
   member  = "serviceAccount:${google_service_account.custom_service_account.email}"
 }
 
+resource "google_project_service" "compute_engine" {
+  project = google_project.my_project.project_id
+  service = "compute.googleapis.com"
+}
+
 resource "google_compute_network" "vpc_network" {
   name                    = "${var.project_id}-network"
   auto_create_subnetworks = false
@@ -40,10 +45,30 @@ resource "google_compute_firewall" "ssh-rule" {
     protocol = "tcp"
     ports = ["22"]
   }
+  target_tags = ["ssh"]
+  source_ranges = ["0.0.0.0/0"]
+  direction = "INGRESS"
+}
+
+resource "google_compute_firewall" "icmp-rule" {
+  name = "allow-icmp"
+  network = google_compute_network.vpc_network.name
   allow {
     protocol = "icmp"
   }
-  target_tags = ["ssh"]
+  target_tags = ["icmp"]
+  source_ranges = ["0.0.0.0/0"]
+  direction = "INGRESS"
+}
+
+resource "google_compute_firewall" "minecraft-rule" {
+  name = "allow-mc"
+  network = google_compute_network.vpc_network.name
+  allow {
+    protocol = "tcp"
+    ports = ["25565","25566"]
+  }
+  target_tags = ["mc"]
   source_ranges = ["0.0.0.0/0"]
   direction = "INGRESS"
 }
@@ -51,7 +76,7 @@ resource "google_compute_firewall" "ssh-rule" {
 resource "google_compute_instance" "vm" {
   name         = "${var.project_id}-vm"
   machine_type = "e2-micro"
-  tags         = ["ssh"]
+  tags         = ["ssh","icmp","mc"]
 
   boot_disk {
     initialize_params {
@@ -61,19 +86,24 @@ resource "google_compute_instance" "vm" {
     }
   }
 
-  metadata_startup_script = templatefile("${path.module}/startup.tpl", {
+  metadata_startup_script = templatefile("${path.module}/startup.tftpl", {
     account_id = var.cf_account_id,
     tunnel_id = cloudflare_tunnel.vm_tunnel.id,
     secret = random_id.argo_secret.b64_std,
-    http_domain = "${cloudflare_record.vm_http.name}.${var.cf_domain}",
     ssh_domain = "${cloudflare_record.ssh.name}.${var.cf_domain}",
+
     wg_privkey = var.wg_privkey,
     wg_pubkey = var.wg_pubkey,
     wg_endpoint = var.wg_endpoint,
     wg_addr = var.wg_addr,
     wg_dns = var.wg_dns,
     wg_allowed_ips = var.wg_allowed_ips,
-    wg_keepalive = var.wg_keepalive
+    wg_keepalive = var.wg_keepalive,
+
+    ddns_token = var.cf_ddns_token,
+    zone_id = data.cloudflare_zone.tld.zone_id,
+    ddns_record_id = cloudflare_record.test.id,
+    ddns_name = "${cloudflare_record.test.name}.${var.cf_domain}"
   })
 
   network_interface {

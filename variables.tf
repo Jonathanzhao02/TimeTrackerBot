@@ -25,13 +25,13 @@ variable "gcp_zone" {
   default = "us-central1-c"
 }
 
-variable "cf_token" {
-  description = "Cloudflare API token"
+variable "cf_ddns_token" {
+  description = "Cloudflare API token for Dynamic DNS"
   type = string
 }
 
-variable "cf_zone_id" {
-  description = "Zone ID for Cloudflare resources"
+variable "cf_token" {
+  description = "Cloudflare API token for DNS updates"
   type = string
 }
 
