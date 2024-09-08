@@ -22,7 +22,7 @@ echo "deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudf
   sudo tee /etc/apt/sources.list.d/cloudflared.list
 sudo apt-get update
 
-sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin cloudflared
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin cloudflared wireguard
 
 /usr/bin/logger "== Cloudflared setup START =="
 
@@ -60,5 +60,26 @@ sudo systemctl start cloudflared
 sudo systemctl start cloudflared-update.timer
 
 /usr/bin/logger "== Cloudflared setup END =="
+
+/usr/bin/logger "== Wireguard setup START =="
+
+sudo mkdir -p /etc/wireguard
+
+cat <<EOF > ~/wg0.conf
+[Interface]
+PrivateKey = ${wg_privkey}
+Address = ${wg_addr}
+DNS = ${wg_dns}
+
+[Peer]
+PublicKey = ${wg_pubkey}
+AllowedIPs = ${wg_allowed_ips}
+Endpoint = ${wg_endpoint}
+PersistentKeepalive = ${wg_keepalive}
+EOF
+
+sudo mv wg0.conf /etc/wireguard/
+
+/usr/bin/logger "== Wireguard setup END =="
 
 /usr/bin/logger "== Startup script END =="

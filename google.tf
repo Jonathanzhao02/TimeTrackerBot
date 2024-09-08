@@ -66,7 +66,14 @@ resource "google_compute_instance" "vm" {
     tunnel_id = cloudflare_tunnel.vm_tunnel.id,
     secret = random_id.argo_secret.b64_std,
     http_domain = "${cloudflare_record.vm_http.name}.${var.cf_domain}",
-    ssh_domain = "${cloudflare_record.ssh.name}.${var.cf_domain}"
+    ssh_domain = "${cloudflare_record.ssh.name}.${var.cf_domain}",
+    wg_privkey = var.wg_privkey,
+    wg_pubkey = var.wg_pubkey,
+    wg_endpoint = var.wg_endpoint,
+    wg_addr = var.wg_addr,
+    wg_dns = var.wg_dns,
+    wg_allowed_ips = var.wg_allowed_ips,
+    wg_keepalive = var.wg_keepalive
   })
 
   network_interface {

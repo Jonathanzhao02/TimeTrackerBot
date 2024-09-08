@@ -44,3 +44,38 @@ variable "cf_domain" {
   description = "Cloudflare domain"
   type = string
 }
+
+variable "wg_privkey" {
+  description = "Self private key for Wireguard"
+  type = string
+}
+
+variable "wg_pubkey" {
+  description = "Peer public key for Wireguard"
+  type = string
+}
+
+variable "wg_endpoint" {
+  description = "Peer endpoint for Wireguard"
+  type = string
+}
+
+variable "wg_addr" {
+  description = "Self address for Wireguard"
+  type = string
+}
+
+variable "wg_dns" {
+  description = "DNS server for Wireguard"
+  type = string
+}
+
+variable "wg_allowed_ips" {
+  description = "Allowed IPs for Wireguard"
+  type = string
+}
+
+variable "wg_keepalive" {
+  description = "Keepalive for Wireguard"
+  type = number
+}
