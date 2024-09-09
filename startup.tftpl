@@ -26,7 +26,6 @@ cat <<EOF | sudo tee -a /etc/nginx/nginx.conf
 stream {
     server {
         listen *:25565-25566;
-
         proxy_pass 10.100.100.1:\$server_port;
     }
 }
@@ -112,6 +111,7 @@ sudo chmod +x /usr/local/bin/update-ddns.sh
 
 sudo mkdir -p /etc/wireguard
 
+# 51820 is unused anyway, can't act as WG receiver
 cat <<EOF | sudo tee /etc/wireguard/wg0.conf
 [Interface]
 PrivateKey = ${wg_privkey}
