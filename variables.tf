@@ -60,6 +60,11 @@ variable "wg_endpoint" {
   type = string
 }
 
+variable "wg_endpoint_port" {
+  description = "Port for peer endpoint for Wireguard"
+  type = string
+}
+
 variable "wg_addr" {
   description = "Self address for Wireguard"
   type = string

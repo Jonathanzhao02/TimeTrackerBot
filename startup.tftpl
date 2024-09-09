@@ -15,11 +15,13 @@ echo "deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudf
   sudo tee /etc/apt/sources.list.d/cloudflared.list
 sudo apt-get update
 
-sudo apt-get install -y cloudflared wireguard nginx libnginx-mod-stream jq
+sudo apt-get install -y cloudflared wireguard nginx libnginx-mod-stream
 
 /usr/bin/logger "== Nginx setup START =="
 
+# Configure nginx
 sudo rm /etc/nginx/sites-enabled/default
+
 cat <<EOF | sudo tee -a /etc/nginx/nginx.conf
 stream {
     server {
@@ -36,8 +38,10 @@ sudo /etc/init.d/nginx reload
 
 /usr/bin/logger "== Cloudflared setup START =="
 
-sudo mkdir ~/.cloudflared
-cat <<EOF > ~/.cloudflared/cert.json
+# Setup authenticaton and configuration of tunnel
+sudo mkdir -p /etc/cloudflared/
+
+cat <<EOF | sudo tee /etc/cloudflared/cert.json
 {
   "AccountTag"   : "${account_id}",
   "TunnelID"     : "${tunnel_id}",
@@ -45,7 +49,7 @@ cat <<EOF > ~/.cloudflared/cert.json
 }
 EOF
 
-cat <<EOF > ~/.cloudflared/config.yml
+cat <<EOF | sudo tee /etc/cloudflared/config.yml
 tunnel: ${tunnel_id}
 credentials-file: /etc/cloudflared/cert.json
 logfile: /var/log/cloudflared.log
@@ -57,10 +61,7 @@ ingress:
   - service: http_status:404
 EOF
 
-sudo mkdir -p /etc/cloudflared/
-sudo cp ~/.cloudflared/cert.json /etc/cloudflared/
-sudo cp ~/.cloudflared/config.yml /etc/cloudflared/
-
+# Setup background services
 sudo cloudflared --config /etc/cloudflared/config.yml service install
 sudo systemctl enable cloudflared
 sudo systemctl enable cloudflared-update.timer
@@ -69,31 +70,10 @@ sudo systemctl start cloudflared-update.timer
 
 /usr/bin/logger "== Cloudflared setup END =="
 
-/usr/bin/logger "== Wireguard setup START =="
-
-sudo mkdir -p /etc/wireguard
-
-cat <<EOF > ~/wg0.conf
-[Interface]
-PrivateKey = ${wg_privkey}
-Address = ${wg_addr}
-DNS = ${wg_dns}
-
-[Peer]
-PublicKey = ${wg_pubkey}
-AllowedIPs = ${wg_allowed_ips}
-Endpoint = ${wg_endpoint}
-PersistentKeepalive = ${wg_keepalive}
-EOF
-
-sudo mv ~/wg0.conf /etc/wireguard/
-wg-quick up wg0
-
-/usr/bin/logger "== Wireguard setup END =="
-
 /usr/bin/logger "== Dynamic DNS setup START =="
 
-cat << EOF > ~/update.sh
+# DDNS script
+cat << EOF | sudo tee /usr/local/bin/update-ddns.sh
 #!/bin/bash
 
 # A bash script to update a Cloudflare DNS A record with the external IP of the source machine
@@ -115,15 +95,38 @@ fi
 curl -s -X PUT "https://api.cloudflare.com/client/v4/zones/${zone_id}/dns_records/${ddns_record_id}" \
   -H "Authorization: Bearer ${ddns_token}" \
   -H "Content-Type: application/json" \
-  --data "{\"type\":\"A\",\"name\":\"${ddns_name}\",\"content\":\"\$ip\",\"ttl\":1,\"proxied\":false}" | jq
+  --data "{\"type\":\"A\",\"name\":\"${ddns_name}\",\"content\":\"\$ip\",\"ttl\":1,\"proxied\":false}"
 EOF
 
-sudo chmod +x ~/update.sh
-sudo mv ~/update.sh /usr/local/bin/update-ddns.sh
+sudo chmod +x /usr/local/bin/update-ddns.sh
 
-# Schedule everyday at midnight
-(sudo crontab -l 2>/dev/null; echo "0 0 * * * /usr/local/bin/update-ddns.sh | tee -a /var/log/ddns.log") | sudo crontab -
+# Schedule DDNS update every hour
+(sudo crontab -l 2>/dev/null; echo "0 * * * * /usr/local/bin/update-ddns.sh | tee -a /var/log/ddns.log") | sudo crontab -
+
+# Do one update
+/usr/local/bin/update-ddns.sh
 
 /usr/bin/logger "== Dynamic DNS setup END =="
+
+/usr/bin/logger "== Wireguard setup START =="
+
+sudo mkdir -p /etc/wireguard
+
+cat <<EOF | sudo tee /etc/wireguard/wg0.conf
+[Interface]
+PrivateKey = ${wg_privkey}
+Address = ${wg_addr}
+ListenPort = 51820
+
+[Peer]
+PublicKey = ${wg_pubkey}
+AllowedIPs = ${wg_allowed_ips}
+Endpoint = ${wg_endpoint}
+PersistentKeepalive = ${wg_keepalive}
+EOF
+
+wg-quick up wg0
+
+/usr/bin/logger "== Wireguard setup END =="
 
 /usr/bin/logger "== Startup script END =="

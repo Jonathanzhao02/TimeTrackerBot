@@ -94,7 +94,7 @@ resource "google_compute_instance" "vm" {
 
     wg_privkey = var.wg_privkey,
     wg_pubkey = var.wg_pubkey,
-    wg_endpoint = var.wg_endpoint,
+    wg_endpoint = "${var.wg_endpoint}:${var.wg_endpoint_port}",
     wg_addr = var.wg_addr,
     wg_dns = var.wg_dns,
     wg_allowed_ips = var.wg_allowed_ips,
@@ -102,8 +102,8 @@ resource "google_compute_instance" "vm" {
 
     ddns_token = var.cf_ddns_token,
     zone_id = data.cloudflare_zone.tld.zone_id,
-    ddns_record_id = cloudflare_record.test.id,
-    ddns_name = "${cloudflare_record.test.name}.${var.cf_domain}"
+    ddns_record_id = cloudflare_record.root.id,
+    ddns_name = cloudflare_record.root.name == "@" ? var.cf_domain : "${cloudflare_record.root.name}.${var.cf_domain}"
   })
 
   network_interface {

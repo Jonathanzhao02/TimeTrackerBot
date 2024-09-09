@@ -20,12 +20,23 @@ resource "cloudflare_record" "ssh" {
   value   = "${cloudflare_tunnel.vm_tunnel.id}.cfargotunnel.com"
   type    = "CNAME"
   proxied = true
+  comment = "SSH from CF Tunnel"
 }
 
-resource "cloudflare_record" "test" {
+resource "cloudflare_record" "root" {
   zone_id = data.cloudflare_zone.tld.zone_id
-  name    = "test"
+  name    = "@"
   value   = "1.1.1.1"
   type    = "A"
   proxied = false
+  comment = "DDNS from VM"
+}
+
+resource "cloudflare_record" "wildcard" {
+  zone_id = data.cloudflare_zone.tld.zone_id
+  name    = "*"
+  value   = "zhaonathan.com"
+  type    = "CNAME"
+  proxied = true
+  comment = "Wildcard"
 }
