@@ -27,7 +27,7 @@ stream {
     server {
         listen *:25565-25566;
         listen *:19132 udp;
-        proxy_pass 10.100.100.1:\$server_port;
+        proxy_pass ${wg_mc_ip}:\$server_port;
     }
 }
 EOF

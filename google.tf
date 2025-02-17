@@ -105,6 +105,7 @@ resource "google_compute_instance" "vm" {
     wg_dns = var.wg_dns,
     wg_allowed_ips = var.wg_allowed_ips,
     wg_keepalive = var.wg_keepalive,
+    wg_mc_ip = var.wg_mc_ip,
 
     ddns_token = var.cf_ddns_token,
     zone_id = data.cloudflare_zone.tld.zone_id,

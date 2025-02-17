@@ -84,3 +84,8 @@ variable "wg_keepalive" {
   description = "Keepalive for Wireguard"
   type = number
 }
+
+variable "wg_mc_ip" {
+  description = "Minecraft server over Wireguard"
+  type = string
+}
