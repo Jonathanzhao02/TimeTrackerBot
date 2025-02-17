@@ -68,6 +68,12 @@ resource "google_compute_firewall" "minecraft-rule" {
     protocol = "tcp"
     ports = ["25565","25566"]
   }
+
+  allow {
+    protocol = "udp"
+    ports = ["19132"]
+  }
+
   target_tags = ["mc"]
   source_ranges = ["0.0.0.0/0"]
   direction = "INGRESS"

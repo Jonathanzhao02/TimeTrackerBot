@@ -26,6 +26,7 @@ cat <<EOF | sudo tee -a /etc/nginx/nginx.conf
 stream {
     server {
         listen *:25565-25566;
+        listen *:19132 udp;
         proxy_pass 10.100.100.1:\$server_port;
     }
 }
